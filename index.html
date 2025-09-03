@@ -445,9 +445,9 @@
     
     <div class="container">
         <section class="photo-section">
-            <div class="photo-frame" id="photoFrame">
-                <div class="placeholder-text">
-                    <i class="fas fa-camera upload-icon"></i>
+    <div class="photo-frame" id="photoFrame">
+        <div class="placeholder-text" id="placeholderText" style="display: none;">
+            <i class="fas fa-camera upload-icon"></i>
                     Нажмите, чтобы загрузить фото
                 </div>
                 <img id="uploadedPhoto" src="" alt="Фото Левона и Алисы">
@@ -864,6 +864,7 @@
         const photoInput = document.getElementById('photoInput');
         const uploadedPhoto = document.getElementById('uploadedPhoto');
         const placeholderText = document.querySelector('.placeholder-text');
+        const DEFAULT_PHOTO = 'https://github.com/Levon637/Invitation/blob/main/img/image0.jpeg';
         
         // Обработчики событий
         refreshPublicGuests.addEventListener('click', loadGuestsFromFirebase);
@@ -916,3 +917,4 @@
     </script>
 </body>
 </html>
+
