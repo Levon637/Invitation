@@ -444,19 +444,16 @@
     <div class="hearts" id="hearts"></div>
     
     <div class="container">
-<section class="photo-section">
-    <div class="photo-frame" id="photoFrame">
-        <div class="placeholder-text" id="placeholderText" style="display: none;">
-            <i class="fas fa-camera upload-icon"></i>
-            Нажмите, чтобы загрузить фото
-        </div>
-        <img id="uploadedPhoto" src="https://source.unsplash.com/random/400x400/?couple,love" alt="Фото Левона и Алисы" style="display: block;">
-    </div>
-    <input type="file" id="photoInput" accept="image/*" style="display: none;">
-    <p style="text-align: center; margin-top: 10px; font-style: italic; color: #b76e79;">
-        Нажмите на фото, чтобы загрузить своё
-    </p>
-</section>
+        <section class="photo-section">
+            <div class="photo-frame" id="photoFrame">
+                <div class="placeholder-text">
+                    <i class="fas fa-camera upload-icon"></i>
+                    Нажмите, чтобы загрузить фото
+                </div>
+                <img id="uploadedPhoto" src="" alt="Фото Левона и Алисы">
+            </div>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+        </section>
         
         <header>
             <h1>Левон & Алиса</h1>
@@ -863,62 +860,45 @@
         const refreshPublicGuests = document.getElementById('refreshPublicGuests');
         
         // Загрузка фото
-const photoFrame = document.getElementById('photoFrame');
-const photoInput = document.getElementById('photoInput');
-const uploadedPhoto = document.getElementById('uploadedPhoto');
-const placeholderText = document.getElementById('placeholderText');
-
-// Фото по умолчанию (замените на вашу ссылку!)
-const DEFAULT_PHOTO = 'http://github.com/Levon637/Invitation/blob/main/img/image0.jpeg';
-
+        const photoFrame = document.getElementById('photoFrame');
+        const photoInput = document.getElementById('photoInput');
+        const uploadedPhoto = document.getElementById('uploadedPhoto');
+        const placeholderText = document.querySelector('.placeholder-text');
         
         // Обработчики событий
         refreshPublicGuests.addEventListener('click', loadGuestsFromFirebase);
         
         photoFrame.addEventListener('click', () => {
-    photoInput.click();
-});
-
-photoInput.addEventListener('change', (event) => {
-    const file = event.target.files[0];
-    if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            // Сохраняем выбранное фото
-            uploadedPhoto.src = e.target.result;
-            localStorage.setItem('weddingPhoto', e.target.result);
-            hidePlaceholder();
-        };
-        reader.readAsDataURL(file);
-    }
-});
-
-function hidePlaceholder() {
-    placeholderText.style.display = 'none';
-    uploadedPhoto.style.display = 'block';
-}
-
-function showPlaceholder() {
-    placeholderText.style.display = 'flex';
-    uploadedPhoto.style.display = 'none';
-}
-
-// Загрузка при старте
-window.addEventListener('DOMContentLoaded', () => {
-    // ... остальной код ...
-    
-    // Загрузка фото
-    const savedPhoto = localStorage.getItem('weddingPhoto');
-    if (savedPhoto) {
-        // Если есть сохраненное фото - показываем его
-        uploadedPhoto.src = savedPhoto;
-        hidePlaceholder();
-    } else {
-        // Если нет сохраненного фото - показываем фото по умолчанию
-        uploadedPhoto.src = DEFAULT_PHOTO;
-        hidePlaceholder();
-    }
-});
+            photoInput.click();
+        });
+        
+        photoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhoto.src = e.target.result;
+                    uploadedPhoto.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                    localStorage.setItem('weddingPhoto', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Загрузка при старте
+        window.addEventListener('DOMContentLoaded', () => {
+            createHearts();
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+            
+            // Загрузка фото
+            const savedPhoto = localStorage.getItem('weddingPhoto');
+            if (savedPhoto) {
+                uploadedPhoto.src = savedPhoto;
+                uploadedPhoto.style.display = 'block';
+                placeholderText.style.display = 'none';
+            }
             
             // Загрузка гостей
             loadGuestsFromFirebase();
@@ -936,4 +916,3 @@ window.addEventListener('DOMContentLoaded', () => {
     </script>
 </body>
 </html>
-
