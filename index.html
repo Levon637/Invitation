@@ -864,11 +864,12 @@
         const refreshPublicGuests = document.getElementById('refreshPublicGuests');
         
         // Загрузка фото
+        const DEFAULT_PHOTO = 'https://github.com/Levon637/Invitation/blob/main/img/image0.jpeg';
         const photoFrame = document.getElementById('photoFrame');
         const photoInput = document.getElementById('photoInput');
         const uploadedPhoto = document.getElementById('uploadedPhoto');
         const placeholderText = document.querySelector('.placeholder-text');
-        const DEFAULT_PHOTO = 'https://github.com/Levon637/Invitation/blob/main/img/image0.jpeg';
+        
         
         // Обработчики событий
         refreshPublicGuests.addEventListener('click', loadGuestsFromFirebase);
@@ -921,5 +922,6 @@
     </script>
 </body>
 </html>
+
 
 
