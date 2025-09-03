@@ -1,0 +1,787 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Приглашение на свадьбу Левона и Алисы</title>
+    <meta name="description" content="Приглашение на свадьбу Левона и Алисы 26 октября 2025 года">
+    <meta name="author" content="Левон и Алиса">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Cormorant+Garamond:wght@300;400&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Cormorant Garamond', serif;
+            background: linear-gradient(to right, #f9f0f0, #f5e1e1);
+            color: #5c4b37;
+            overflow-x: hidden;
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        .hearts {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .heart {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            background: transparent;
+            opacity: 0.7;
+        }
+        
+        .heart:before, .heart:after {
+            content: "";
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: #ff9bb9;
+            border-radius: 50%;
+        }
+        
+        .heart:before {
+            top: -50%;
+            left: 0;
+        }
+        
+        .heart:after {
+            top: 0;
+            left: 50%;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+            z-index: 1;
+        }
+        
+        .photo-section {
+            text-align: center;
+            margin: 20px 0 30px;
+            position: relative;
+        }
+        
+        .photo-frame {
+            width: 220px;
+            height: 220px;
+            margin: 0 auto;
+            background: #faf0f0;
+            border: 8px solid #d89d9d;
+            border-radius: 50%;
+            box-shadow: 0 0 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.4s ease;
+        }
+        
+        .photo-frame:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 35px rgba(0, 0, 0, 0.25);
+        }
+        
+        .photo-frame img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: none;
+            border-radius: 50%;
+        }
+        
+        .placeholder-text {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            color: #d89d9d;
+            font-style: italic;
+            text-align: center;
+            padding: 20px;
+            flex-direction: column;
+            gap: 15px;
+            border-radius: 50%;
+        }
+        
+        .upload-icon {
+            font-size: 2.5rem;
+            color: #d89d9d;
+        }
+        
+        header {
+            text-align: center;
+            padding: 10px 0 30px;
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 3.2rem;
+            margin-bottom: 10px;
+            color: #b76e79;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            animation: fadeIn 2s ease;
+        }
+        
+        h2 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2rem;
+            margin: 20px 0;
+            color: #b76e79;
+        }
+        
+        .subtitle {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            font-style: italic;
+            color: #b76e79;
+        }
+        
+        .divider {
+            height: 2px;
+            background: linear-gradient(to right, transparent, #d89d9d, transparent);
+            width: 60%;
+            margin: 25px auto;
+        }
+        
+        .invitation-text {
+            text-align: center;
+            font-size: 1.3rem;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto 30px;
+            padding: 20px;
+            background: rgba(255, 240, 240, 0.7);
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .countdown {
+            text-align: center;
+            margin: 30px 0;
+            padding: 25px;
+            background: rgba(183, 110, 121, 0.1);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .timer-unit {
+            background: #faf0f0;
+            padding: 15px;
+            border-radius: 10px;
+            min-width: 90px;
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .timer-number {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: #b76e79;
+        }
+        
+        .timer-label {
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+        
+        .locations {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 25px;
+            margin: 30px 0;
+        }
+        
+        .location-card {
+            flex: 1;
+            min-width: 300px;
+            padding: 25px;
+            background: rgba(255, 240, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .location-icon {
+            font-size: 2.2rem;
+            color: #b76e79;
+            margin-bottom: 15px;
+        }
+        
+        .location-time {
+            font-weight: bold;
+            color: #b76e79;
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+        
+        .guest-section {
+            max-width: 800px;
+            margin: 30px auto;
+            padding: 25px;
+            background: rgba(255, 240, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #b76e79;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e8c7c7;
+            border-radius: 8px;
+            background: #fdf7f7;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.1rem;
+            color: #5c4b37;
+        }
+        
+        input:focus {
+            outline: none;
+            border-color: #d89d9d;
+            box-shadow: 0 0 0 2px rgba(216, 157, 157, 0.3);
+        }
+        
+        button {
+            background: #b76e79;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 1.2rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        button:hover {
+            background: #9c5861;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+        }
+        
+        .confirmation-message {
+            margin-top: 20px;
+            padding: 15px;
+            background: #faf0f0;
+            border-radius: 8px;
+            border-left: 4px solid #d89d9d;
+            display: none;
+        }
+        
+        .public-guests-section {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 25px;
+            background: rgba(255, 240, 240, 0.7);
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .public-guest-list {
+            max-height: 400px;
+            overflow-y: auto;
+            margin: 20px 0;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 10px;
+            border: 1px solid #e8c7c7;
+        }
+        
+        .public-guest-item {
+            padding: 12px;
+            border-bottom: 1px solid #f0d9d9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .public-guest-item:last-child {
+            border-bottom: none;
+        }
+        
+        .guest-number {
+            font-weight: bold;
+            color: #b76e79;
+            min-width: 30px;
+        }
+        
+        .guest-name {
+            flex-grow: 1;
+            text-align: left;
+            padding: 0 15px;
+            font-size: 1.1rem;
+        }
+        
+        .guest-date {
+            color: #a67c52;
+            font-size: 0.9rem;
+            min-width: 120px;
+            text-align: right;
+        }
+        
+        .guests-count {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #b76e79;
+            margin: 15px 0;
+            font-weight: bold;
+        }
+        
+        .refresh-btn {
+            background: #d89d9d;
+            margin: 10px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px 0;
+            margin-top: 40px;
+            font-size: 1.1rem;
+            color: #b76e79;
+            border-top: 1px solid #e8c7c7;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            h2 {
+                font-size: 1.8rem;
+            }
+            
+            .timer {
+                flex-wrap: wrap;
+            }
+            
+            .locations {
+                flex-direction: column;
+            }
+            
+            .photo-frame {
+                width: 180px;
+                height: 180px;
+            }
+            
+            .public-guest-item {
+                flex-direction: column;
+                text-align: center;
+                gap: 5px;
+            }
+            
+            .guest-date {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="hearts" id="hearts"></div>
+    
+    <div class="container">
+        <section class="photo-section">
+            <div class="photo-frame" id="photoFrame">
+                <div class="placeholder-text">
+                    <i class="fas fa-camera upload-icon"></i>
+                    Нажмите, чтобы загрузить фото
+                </div>
+                <img id="uploadedPhoto" src="" alt="Фото Левона и Алисы">
+            </div>
+            <input type="file" id="photoInput" accept="image/*" style="display: none;">
+        </section>
+        
+        <header>
+            <h1>Левон & Алиса</h1>
+            <p class="subtitle">Приглашаем вас на нашу свадьбу</p>
+            <div class="divider"></div>
+        </header>
+        
+        <section class="invitation-text">
+            <p>Дорогие друзья и родные!</p>
+            <p>Мы с огромной радостью хотим разделить с вами самый важный день в нашей жизни.</p>
+            <p>Ждем вас <strong>26 октября 2025 года</strong> на торжественную церемонию и праздничный ужин.</p>
+        </section>
+        
+        <section class="countdown">
+            <h2>До свадьбы осталось:</h2>
+            <div class="timer">
+                <div class="timer-unit">
+                    <div class="timer-number" id="days">0</div>
+                    <div class="timer-label">дней</div>
+                </div>
+                <div class="timer-unit">
+                    <div class="timer-number" id="hours">0</div>
+                    <div class="timer-label">часов</div>
+                </div>
+                <div class="timer-unit">
+                    <div class="timer-number" id="minutes">0</div>
+                    <div class="timer-label">минут</div>
+                </div>
+                <div class="timer-unit">
+                    <div class="timer-number" id="seconds">0</div>
+                    <div class="timer-label">секунд</div>
+                </div>
+            </div>
+        </section>
+        
+        <section class="locations">
+            <div class="location-card">
+                <div class="location-icon">
+                    <i class="fas fa-church"></i>
+                </div>
+                <h3>Церковная церемония</h3>
+                <p class="location-time">14:00</p>
+                <p>Храм Святого Григория Просветителя</p>
+                <p>ул. Армянская, 25</p>
+            </div>
+            
+            <div class="location-card">
+                <div class="location-icon">
+                    <i class="fas fa-utensils"></i>
+                </div>
+                <h3>Праздничный ужин</h3>
+                <p class="location-time">17:00</p>
+                <p>Ресторан "Белая сирень"</p>
+                <p>ул. Цветочная, 18</p>
+            </div>
+        </section>
+        
+        <section class="guest-section">
+            <h2>Подтвердите участие</h2>
+            <p>Пожалуйста, введите ваши ФИО для подтверждения присутствия</p>
+            
+            <div class="form-group">
+                <label for="guestName">Ваши ФИО:</label>
+                <input type="text" id="guestName" placeholder="Введите ваше полное имя">
+            </div>
+            
+            <button id="addGuest">
+                <i class="fas fa-check-circle"></i> Подтвердить участие
+            </button>
+            
+            <div class="confirmation-message" id="confirmationMessage">
+                Спасибо! Ваше участие подтверждено.
+            </div>
+        </section>
+        
+        <section class="public-guests-section">
+            <h2>Список гостей</h2>
+            <p>Друзья, которые уже подтвердили участие:</p>
+            
+            <div class="guests-count">
+                Всего гостей: <span id="totalGuestsCount">0</span>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="refreshPublicGuests" class="refresh-btn">
+                    <i class="fas fa-sync"></i> Обновить список
+                </button>
+            </div>
+            
+            <div class="public-guest-list" id="publicGuestList">
+                <div class="public-guest-item">
+                    <div class="guest-name">Загрузка списка гостей...</div>
+                </div>
+            </div>
+        </section>
+        
+        <footer>
+            <p>С любовью, Левон и Алиса</p>
+            <p>26 октября 2025 года</p>
+        </footer>
+    </div>
+
+    <script>
+        // ================== КОНФИГУРАЦИЯ ==================
+        // Замените этот URL на URL вашего Google Apps Script после развертывания
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpaI7YX71mbv1TJ1-shX7S9QSRinBzpY9qfqTOH3lBFpXImFTRvn-yE2l2-GXHQGCg/exec";
+        const REFRESH_INTERVAL = 30000; // 30 секунд
+        
+        // ================== ОСНОВНЫЕ ФУНКЦИИ ==================
+        function createHearts() {
+            const heartsContainer = document.getElementById('hearts');
+            const heartCount = 25;
+            
+            for (let i = 0; i < heartCount; i++) {
+                const heart = document.createElement('div');
+                heart.className = 'heart';
+                heart.style.left = Math.random() * 100 + 'vw';
+                heart.style.animation = `float ${6 + Math.random() * 10}s linear infinite`;
+                heart.style.animationDelay = Math.random() * 5 + 's';
+                
+                const size = 10 + Math.random() * 20;
+                heart.style.width = size + 'px';
+                heart.style.height = size + 'px';
+                
+                const colors = ['#ff9bb9', '#ffb6c1', '#ffc0cb', '#f8c8dc', '#fadadd'];
+                heart.style.color = colors[Math.floor(Math.random() * colors.length)];
+                
+                heartsContainer.appendChild(heart);
+            }
+        }
+        
+        function updateCountdown() {
+            const weddingDate = new Date('October 26, 2025 15:00:00').getTime();
+            const now = new Date().getTime();
+            const distance = weddingDate - now;
+            
+            if (distance < 0) {
+                document.getElementById('days').innerText = '0';
+                document.getElementById('hours').innerText = '0';
+                document.getElementById('minutes').innerText = '0';
+                document.getElementById('seconds').innerText = '0';
+                return;
+            }
+            
+            const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+            
+            document.getElementById('days').innerText = days;
+            document.getElementById('hours').innerText = hours;
+            document.getElementById('minutes').innerText = minutes;
+            document.getElementById('seconds').innerText = seconds;
+        }
+        
+        // ================== GOOGLE SHEETS API ==================
+        async function addGuestToSheet(name) {
+            try {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    },
+                    body: `action=addGuest&name=${encodeURIComponent(name)}&timestamp=${encodeURIComponent(new Date().toLocaleString('ru-RU'))}`
+                });
+                
+                const result = await response.json();
+                return result.success;
+            } catch (error) {
+                console.error('Ошибка добавления гостя:', error);
+                return false;
+            }
+        }
+        
+        async function getGuestsFromSheet() {
+            try {
+                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getGuests&cache=${new Date().getTime()}`);
+                const result = await response.json();
+                
+                if (result.success && result.guests) {
+                    return result.guests;
+                }
+                return [];
+            } catch (error) {
+                console.error('Ошибка получения гостей:', error);
+                return [];
+            }
+        }
+        
+        // ================== ОТОБРАЖЕНИЕ ДЛЯ ВСЕХ ГОСТЕЙ ==================
+        async function loadPublicGuestList() {
+            try {
+                const guests = await getGuestsFromSheet();
+                const publicGuestList = document.getElementById('publicGuestList');
+                const totalGuestsCount = document.getElementById('totalGuestsCount');
+                
+                totalGuestsCount.textContent = guests.length;
+                
+                if (guests.length === 0) {
+                    publicGuestList.innerHTML = `
+                        <div class="public-guest-item">
+                            <div class="guest-name">Пока никто не подтвердил участие. Будьте первым!</div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                publicGuestList.innerHTML = '';
+                
+                // Сортируем гостей по дате (сначала новые)
+                const sortedGuests = [...guests].sort((a, b) => 
+                    new Date(b.timestamp) - new Date(a.timestamp)
+                );
+                
+                sortedGuests.forEach((guest, index) => {
+                    const guestElement = document.createElement('div');
+                    guestElement.className = 'public-guest-item';
+                    guestElement.innerHTML = `
+                        <span class="guest-number">${sortedGuests.length - index}.</span>
+                        <span class="guest-name">${guest.name}</span>
+                        <span class="guest-date">${guest.timestamp}</span>
+                    `;
+                    publicGuestList.appendChild(guestElement);
+                });
+                
+            } catch (error) {
+                console.error('Ошибка загрузки списка гостей:', error);
+                publicGuestList.innerHTML = `
+                    <div class="public-guest-item">
+                        <div class="guest-name">Ошибка загрузки списка. Попробуйте обновить страницу.</div>
+                    </div>
+                `;
+            }
+        }
+        
+        // ================== ДОБАВЛЕНИЕ ГОСТЯ ==================
+        async function addGuest() {
+            const name = guestNameInput.value.trim();
+            if (name) {
+                // Показываем сообщение о загрузке
+                confirmationMessage.textContent = "Отправка данных...";
+                confirmationMessage.style.display = 'block';
+                confirmationMessage.style.background = '#d1ecf1';
+                confirmationMessage.style.color = '#0c5460';
+                confirmationMessage.style.borderLeftColor = '#0c5460';
+                
+                const success = await addGuestToSheet(name);
+                
+                if (success) {
+                    guestNameInput.value = '';
+                    confirmationMessage.textContent = 'Спасибо! Ваше участие подтверждено.';
+                    confirmationMessage.style.background = '#d4edda';
+                    confirmationMessage.style.color = '#155724';
+                    confirmationMessage.style.borderLeftColor = '#155724';
+                    
+                    // Обновляем публичный список
+                    setTimeout(() => {
+                        loadPublicGuestList();
+                    }, 1000);
+                    
+                    // Скрываем сообщение через 5 секунд
+                    setTimeout(() => {
+                        confirmationMessage.style.display = 'none';
+                    }, 5000);
+                } else {
+                    confirmationMessage.textContent = 'Ошибка сохранения. Попробуйте еще раз.';
+                    confirmationMessage.style.background = '#f8d7da';
+                    confirmationMessage.style.color = '#721c24';
+                    confirmationMessage.style.borderLeftColor = '#721c24';
+                }
+            } else {
+                alert('Пожалуйста, введите ваше ФИО');
+            }
+        }
+        
+        // ================== АВТООБНОВЛЕНИЕ ==================
+        function startAutoRefresh() {
+            // Первая загрузка
+            loadPublicGuestList();
+            
+            // Автообновление каждые 30 секунд
+            setInterval(loadPublicGuestList, REFRESH_INTERVAL);
+        }
+        
+        // ================== ИНИЦИАЛИЗАЦИЯ ==================
+        const guestNameInput = document.getElementById('guestName');
+        const addGuestButton = document.getElementById('addGuest');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+        const refreshPublicGuests = document.getElementById('refreshPublicGuests');
+        
+        // Загрузка фото
+        const photoFrame = document.getElementById('photoFrame');
+        const photoInput = document.getElementById('photoInput');
+        const uploadedPhoto = document.getElementById('uploadedPhoto');
+        const placeholderText = document.querySelector('.placeholder-text');
+        
+        // Обработчики событий
+        refreshPublicGuests.addEventListener('click', loadPublicGuestList);
+        
+        photoFrame.addEventListener('click', () => {
+            photoInput.click();
+        });
+        
+        photoInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    uploadedPhoto.src = e.target.result;
+                    uploadedPhoto.style.display = 'block';
+                    placeholderText.style.display = 'none';
+                    localStorage.setItem('weddingPhoto', e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Загрузка при старте
+        window.addEventListener('DOMContentLoaded', () => {
+            createHearts();
+            setInterval(updateCountdown, 1000);
+            updateCountdown();
+            
+            // Загрузка фото
+            const savedPhoto = localStorage.getItem('weddingPhoto');
+            if (savedPhoto) {
+                uploadedPhoto.src = savedPhoto;
+                uploadedPhoto.style.display = 'block';
+                placeholderText.style.display = 'none';
+            }
+            
+            // Запуск автообновления списка гостей
+            startAutoRefresh();
+            
+            // Обработчики
+            guestNameInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') addGuest();
+            });
+            
+            addGuestButton.addEventListener('click', addGuest);
+        });
+    </script>
+</body>
+</html>
