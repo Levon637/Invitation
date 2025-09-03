@@ -379,6 +379,19 @@
             margin: 10px;
         }
         
+        .admin-panel {
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #b76e79;
+        }
+        
+        .admin-btn {
+            background: #4CAF50;
+            margin: 5px;
+        }
+        
         footer {
             text-align: center;
             padding: 25px 0;
@@ -536,6 +549,18 @@
                 </div>
             </div>
         </section>
+
+        <!-- Панель администратора (видна только вам) -->
+        <section class="admin-panel" id="adminPanel" style="display: none;">
+            <h2>Панель управления (для организаторов)</h2>
+            <button id="exportGuests" class="admin-btn">
+                <i class="fas fa-download"></i> Скачать список гостей
+            </button>
+            <button id="clearGuests" class="admin-btn" style="background: #f44336;">
+                <i class="fas fa-trash"></i> Очистить список (осторожно!)
+            </button>
+            <div id="adminMessage" style="margin-top: 10px; padding: 10px; display: none;"></div>
+        </section>
         
         <footer>
             <p>С любовью, Левон и Алиса</p>
@@ -543,12 +568,33 @@
         </footer>
     </div>
 
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script>
-        // ================== КОНФИГУРАЦИЯ ==================
-        // Замените этот URL на URL вашего Google Apps Script после развертывания
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzpaI7YX71mbv1TJ1-shX7S9QSRinBzpY9qfqTOH3lBFpXImFTRvn-yE2l2-GXHQGCg/exec";
-        const REFRESH_INTERVAL = 30000; // 30 секунд
-        
+        // ================== FIREBASE КОНФИГУРАЦИЯ ==================
+        // ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ РЕАЛЬНЫЕ ДАННЫЕ ИЗ FIREBASE!
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJGh0OQ_2Hwy4AgxdT6KBD7aYX9LXB-J0",
+            authDomain: "ВАШ_PROJECT.firebaseapp.com",
+            projectId: "weddguests",
+            storageBucket: "ВАШ_PROJECT.appspot.com",
+            messagingSenderId: "ВАШ_SENDER_ID",
+            appId: "1:443526798737:web:55db41b9610608353b4e30"
+        };
+
+        // ================== ИНИЦИАЛИЗАЦИЯ FIREBASE ==================
+        let db;
+        try {
+            firebase.initializeApp(firebaseConfig);
+            db = firebase.firestore();
+            console.log("Firebase подключен успешно!");
+        } catch (error) {
+            console.error("Ошибка Firebase:", error);
+            db = null;
+        }
+
         // ================== ОСНОВНЫЕ ФУНКЦИИ ==================
         function createHearts() {
             const heartsContainer = document.getElementById('hearts');
@@ -595,134 +641,216 @@
             document.getElementById('minutes').innerText = minutes;
             document.getElementById('seconds').innerText = seconds;
         }
-        
-        // ================== GOOGLE SHEETS API ==================
-        async function addGuestToSheet(name) {
+
+        // ================== РАБОТА С FIREBASE ==================
+        async function addGuestToFirebase(name) {
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `action=addGuest&name=${encodeURIComponent(name)}&timestamp=${encodeURIComponent(new Date().toLocaleString('ru-RU'))}`
-                });
+                const timestamp = new Date().toLocaleString('ru-RU');
+                const guestData = {
+                    name: name,
+                    timestamp: timestamp,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                };
                 
-                const result = await response.json();
-                return result.success;
+                // Проверяем, нет ли уже такого гостя
+                const snapshot = await db.collection('guests')
+                    .where('name', '==', name)
+                    .get();
+                    
+                if (!snapshot.empty) {
+                    return { success: false, message: 'Гость с таким именем уже существует' };
+                }
+                
+                // Добавляем нового гостя
+                await db.collection('guests').add(guestData);
+                return { success: true };
+                
             } catch (error) {
                 console.error('Ошибка добавления гостя:', error);
-                return false;
+                return { success: false, message: 'Ошибка подключения к базе данных' };
             }
         }
         
-        async function getGuestsFromSheet() {
-            try {
-                const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=getGuests&cache=${new Date().getTime()}`);
-                const result = await response.json();
-                
-                if (result.success && result.guests) {
-                    return result.guests;
-                }
-                return [];
-            } catch (error) {
-                console.error('Ошибка получения гостей:', error);
-                return [];
+        function loadGuestsFromFirebase() {
+            if (!db) {
+                showFirebaseError();
+                return;
             }
-        }
-        
-        // ================== ОТОБРАЖЕНИЕ ДЛЯ ВСЕХ ГОСТЕЙ ==================
-        async function loadPublicGuestList() {
-            try {
-                const guests = await getGuestsFromSheet();
-                const publicGuestList = document.getElementById('publicGuestList');
-                const totalGuestsCount = document.getElementById('totalGuestsCount');
-                
-                totalGuestsCount.textContent = guests.length;
-                
-                if (guests.length === 0) {
-                    publicGuestList.innerHTML = `
-                        <div class="public-guest-item">
-                            <div class="guest-name">Пока никто не подтвердил участие. Будьте первым!</div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                publicGuestList.innerHTML = '';
-                
-                // Сортируем гостей по дате (сначала новые)
-                const sortedGuests = [...guests].sort((a, b) => 
-                    new Date(b.timestamp) - new Date(a.timestamp)
-                );
-                
-                sortedGuests.forEach((guest, index) => {
-                    const guestElement = document.createElement('div');
-                    guestElement.className = 'public-guest-item';
-                    guestElement.innerHTML = `
-                        <span class="guest-number">${sortedGuests.length - index}.</span>
-                        <span class="guest-name">${guest.name}</span>
-                        <span class="guest-date">${guest.timestamp}</span>
-                    `;
-                    publicGuestList.appendChild(guestElement);
+            
+            db.collection('guests')
+                .orderBy('createdAt', 'desc')
+                .onSnapshot((snapshot) => {
+                    const guests = [];
+                    snapshot.forEach((doc) => {
+                        const data = doc.data();
+                        guests.push({
+                            id: doc.id,
+                            name: data.name,
+                            timestamp: data.timestamp,
+                            createdAt: data.createdAt
+                        });
+                    });
+                    displayGuests(guests);
+                }, (error) => {
+                    console.error('Ошибка загрузки гостей:', error);
+                    showFirebaseError();
                 });
-                
-            } catch (error) {
-                console.error('Ошибка загрузки списка гостей:', error);
+        }
+        
+        function showFirebaseError() {
+            const publicGuestList = document.getElementById('publicGuestList');
+            publicGuestList.innerHTML = `
+                <div class="public-guest-item">
+                    <div class="guest-name">Ошибка загрузки списка. Обновите страницу.</div>
+                </div>
+            `;
+        }
+        
+        // ================== ОТОБРАЖЕНИЕ ГОСТЕЙ ==================
+        function displayGuests(guests) {
+            const publicGuestList = document.getElementById('publicGuestList');
+            const totalGuestsCount = document.getElementById('totalGuestsCount');
+            
+            totalGuestsCount.textContent = guests.length;
+            
+            if (guests.length === 0) {
                 publicGuestList.innerHTML = `
                     <div class="public-guest-item">
-                        <div class="guest-name">Ошибка загрузки списка. Попробуйте обновить страницу.</div>
+                        <div class="guest-name">Пока никто не подтвердил участие. Будьте первым!</div>
                     </div>
                 `;
+                return;
+            }
+            
+            publicGuestList.innerHTML = '';
+            
+            guests.forEach((guest, index) => {
+                const guestElement = document.createElement('div');
+                guestElement.className = 'public-guest-item';
+                guestElement.innerHTML = `
+                    <span class="guest-number">${guests.length - index}.</span>
+                    <span class="guest-name">${guest.name}</span>
+                    <span class="guest-date">${guest.timestamp || formatDate(guest.createdAt)}</span>
+                `;
+                publicGuestList.appendChild(guestElement);
+            });
+        }
+        
+        function formatDate(timestamp) {
+            if (!timestamp) return 'Не указано';
+            try {
+                return timestamp.toDate().toLocaleString('ru-RU');
+            } catch (e) {
+                return new Date(timestamp).toLocaleString('ru-RU');
             }
         }
         
         // ================== ДОБАВЛЕНИЕ ГОСТЯ ==================
         async function addGuest() {
             const name = guestNameInput.value.trim();
-            if (name) {
-                // Показываем сообщение о загрузке
-                confirmationMessage.textContent = "Отправка данных...";
-                confirmationMessage.style.display = 'block';
-                confirmationMessage.style.background = '#d1ecf1';
-                confirmationMessage.style.color = '#0c5460';
-                confirmationMessage.style.borderLeftColor = '#0c5460';
-                
-                const success = await addGuestToSheet(name);
-                
-                if (success) {
-                    guestNameInput.value = '';
-                    confirmationMessage.textContent = 'Спасибо! Ваше участие подтверждено.';
-                    confirmationMessage.style.background = '#d4edda';
-                    confirmationMessage.style.color = '#155724';
-                    confirmationMessage.style.borderLeftColor = '#155724';
-                    
-                    // Обновляем публичный список
-                    setTimeout(() => {
-                        loadPublicGuestList();
-                    }, 1000);
-                    
-                    // Скрываем сообщение через 5 секунд
-                    setTimeout(() => {
-                        confirmationMessage.style.display = 'none';
-                    }, 5000);
-                } else {
-                    confirmationMessage.textContent = 'Ошибка сохранения. Попробуйте еще раз.';
-                    confirmationMessage.style.background = '#f8d7da';
-                    confirmationMessage.style.color = '#721c24';
-                    confirmationMessage.style.borderLeftColor = '#721c24';
-                }
-            } else {
+            if (!name) {
                 alert('Пожалуйста, введите ваше ФИО');
+                return;
+            }
+            
+            confirmationMessage.textContent = "Добавление в список...";
+            confirmationMessage.style.display = 'block';
+            confirmationMessage.style.background = '#d1ecf1';
+            confirmationMessage.style.color = '#0c5460';
+            confirmationMessage.style.borderLeftColor = '#0c5460';
+            
+            let result;
+            
+            if (db) {
+                result = await addGuestToFirebase(name);
+            } else {
+                result = { success: false, message: 'Ошибка подключения к базе данных' };
+            }
+            
+            if (result.success) {
+                guestNameInput.value = '';
+                confirmationMessage.textContent = 'Спасибо! Ваше участие подтверждено.';
+                confirmationMessage.style.background = '#d4edda';
+                confirmationMessage.style.color = '#155724';
+                confirmationMessage.style.borderLeftColor = '#155724';
+            } else {
+                confirmationMessage.textContent = result.message || 'Ошибка сохранения. Попробуйте еще раз.';
+                confirmationMessage.style.background = '#f8d7da';
+                confirmationMessage.style.color = '#721c24';
+                confirmationMessage.style.borderLeftColor = '#721c24';
+            }
+            
+            setTimeout(() => {
+                confirmationMessage.style.display = 'none';
+            }, 5000);
+        }
+        
+        // ================== АДМИН-ПАНЕЛЬ ==================
+        function setupAdminPanel() {
+            // Простая проверка - если в URL есть параметр admin
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('admin') === 'true') {
+                document.getElementById('adminPanel').style.display = 'block';
+            }
+            
+            document.getElementById('exportGuests').addEventListener('click', exportGuests);
+            document.getElementById('clearGuests').addEventListener('click', clearGuests);
+        }
+        
+        async function exportGuests() {
+            if (!db) return;
+            
+            try {
+                const snapshot = await db.collection('guests').get();
+                const guests = [];
+                snapshot.forEach(doc => {
+                    guests.push(doc.data());
+                });
+                
+                const csv = guests.map(g => `"${g.name}","${g.timestamp}"`).join('\n');
+                const blob = new Blob(['Имя,Дата добавления\n' + csv], { type: 'text/csv' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'список_гостей.csv';
+                a.click();
+                
+                showAdminMessage('Список гостей успешно экспортирован!', 'success');
+            } catch (error) {
+                showAdminMessage('Ошибка экспорта: ' + error.message, 'error');
             }
         }
         
-        // ================== АВТООБНОВЛЕНИЕ ==================
-        function startAutoRefresh() {
-            // Первая загрузка
-            loadPublicGuestList();
+        async function clearGuests() {
+            if (!confirm('Вы уверены что хотите очистить весь список гостей? Это действие нельзя отменить!')) {
+                return;
+            }
             
-            // Автообновление каждые 30 секунд
-            setInterval(loadPublicGuestList, REFRESH_INTERVAL);
+            if (!db) return;
+            
+            try {
+                const snapshot = await db.collection('guests').get();
+                const batch = db.batch();
+                snapshot.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                await batch.commit();
+                showAdminMessage('Список гостей очищен!', 'success');
+            } catch (error) {
+                showAdminMessage('Ошибка очистки: ' + error.message, 'error');
+            }
+        }
+        
+        function showAdminMessage(text, type) {
+            const messageDiv = document.getElementById('adminMessage');
+            messageDiv.textContent = text;
+            messageDiv.style.display = 'block';
+            messageDiv.style.background = type === 'success' ? '#d4edda' : '#f8d7da';
+            messageDiv.style.color = type === 'success' ? '#155724' : '#721c24';
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 3000);
         }
         
         // ================== ИНИЦИАЛИЗАЦИЯ ==================
@@ -738,7 +866,7 @@
         const placeholderText = document.querySelector('.placeholder-text');
         
         // Обработчики событий
-        refreshPublicGuests.addEventListener('click', loadPublicGuestList);
+        refreshPublicGuests.addEventListener('click', loadGuestsFromFirebase);
         
         photoFrame.addEventListener('click', () => {
             photoInput.click();
@@ -772,8 +900,11 @@
                 placeholderText.style.display = 'none';
             }
             
-            // Запуск автообновления списка гостей
-            startAutoRefresh();
+            // Загрузка гостей
+            loadGuestsFromFirebase();
+            
+            // Настройка админ-панели
+            setupAdminPanel();
             
             // Обработчики
             guestNameInput.addEventListener('keypress', function(e) {
