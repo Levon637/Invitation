@@ -444,16 +444,10 @@
     <div class="hearts" id="hearts"></div>
     
     <div class="container">
-        <section class="photo-section">
-    <div class="photo-frame" id="photoFrame">
-        <div class="placeholder-text">
-            <i class="fas fa-camera upload-icon"></i>
-            Нажмите, чтобы загрузить фото
-        </div>
-        <!-- Просто добавьте ссылку на ваше фото в src -->
-        <img id="uploadedPhoto" src="https://github.com/Levon637/Invitation/blob/main/img/image0.jpeg" alt="" style="display: block;">
+       <section class="photo-section">
+    <div class="photo-frame">
+        <img src="https://ibb.co/NdKR2shF" alt="" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
     </div>
-    <input type="file" id="photoInput" accept="image/*" style="display: none;">
 </section>
         
         <header>
@@ -861,31 +855,9 @@
         const refreshPublicGuests = document.getElementById('refreshPublicGuests');
         
         // Загрузка фото
-        const photoFrame = document.getElementById('photoFrame');
-        const photoInput = document.getElementById('photoInput');
-        const uploadedPhoto = document.getElementById('uploadedPhoto');
         const placeholderText = document.querySelector('.placeholder-text');
         
-        // Обработчики событий
-        refreshPublicGuests.addEventListener('click', loadGuestsFromFirebase);
-        
-        photoFrame.addEventListener('click', () => {
-            photoInput.click();
-        });
-        
-        photoInput.addEventListener('change', (event) => {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    uploadedPhoto.src = e.target.result;
-                    uploadedPhoto.style.display = 'block';
-                    placeholderText.style.display = 'none';
-                    localStorage.setItem('weddingPhoto', e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        });
+       
         
         // Загрузка при старте
         window.addEventListener('DOMContentLoaded', () => {
@@ -893,13 +865,7 @@
             setInterval(updateCountdown, 1000);
             updateCountdown();
             
-            // Загрузка фото
-            const savedPhoto = localStorage.getItem('weddingPhoto');
-            if (savedPhoto) {
-                uploadedPhoto.src = savedPhoto;
-                uploadedPhoto.style.display = 'block';
-                placeholderText.style.display = 'none';
-            }
+            
             
             // Загрузка гостей
             loadGuestsFromFirebase();
@@ -940,5 +906,6 @@ window.addEventListener('DOMContentLoaded', function() {
     </script>
 </body>
 </html>
+
 
 
