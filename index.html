@@ -445,15 +445,16 @@
     
     <div class="container">
         <section class="photo-section">
-            <div class="photo-frame" id="photoFrame">
-                <div class="placeholder-text">
-                    <i class="fas fa-camera upload-icon"></i>
-                    Нажмите, чтобы загрузить фото
-                </div>
-                <img id="uploadedPhoto" src="" alt="Фото Левона и Алисы">
-            </div>
-            <input type="file" id="photoInput" accept="image/*" style="display: none;">
-        </section>
+    <div class="photo-frame" id="photoFrame">
+        <div class="placeholder-text">
+            <i class="fas fa-camera upload-icon"></i>
+            Нажмите, чтобы загрузить фото
+        </div>
+        <!-- Просто добавьте ссылку на ваше фото в src -->
+        <img id="uploadedPhoto" src="https://ibb.co/50w6mv3" alt="Фото Левона и Алисы" style="display: block;">
+    </div>
+    <input type="file" id="photoInput" accept="image/*" style="display: none;">
+</section>
         
         <header>
             <h1>Левон & Алиса</h1>
@@ -913,6 +914,30 @@
             
             addGuestButton.addEventListener('click', addGuest);
         });
+    // ================== ФОТО ПО УМОЛЧАНИЮ ==================
+function initPhoto() {
+    const uploadedPhoto = document.getElementById('uploadedPhoto');
+    const placeholderText = document.querySelector('.placeholder-text');
+    
+    // Ваше фото по умолчанию (ЗАМЕНИТЕ НА СВОЮ ССЫЛКУ!)
+    const defaultPhoto = 'https://пример.com/ваше-фото.jpg';
+    
+    // Если нет сохраненного фото - используем фото по умолчанию
+    if (!localStorage.getItem('weddingPhoto')) {
+        uploadedPhoto.src = defaultPhoto;
+        uploadedPhoto.style.display = 'block';
+        if (placeholderText) {
+            placeholderText.style.display = 'none';
+        }
+    }
+}
+
+// Вызываем при загрузке страницы
+window.addEventListener('DOMContentLoaded', function() {
+    // ... ваш существующий код ...
+    initPhoto(); // Добавьте эту строку в конец
+});
     </script>
 </body>
 </html>
+
